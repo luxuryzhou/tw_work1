@@ -1,5 +1,10 @@
 package testalg;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -7,70 +12,60 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * @author zhou
+ * 
+ * @environment JKD1.5 or higher
+ * 
+ * @input the program need to place a named "inp.txt" file near the Galaxy.java file as beginning by run the main function
+ * 
+ * the content of the input text need to obey the following rules:
+ * 1. words separated by white space only
+ * 2. should define the galaxy and roma like: [galaxy] is [roma]
+ * 3. should define the metal costs like: [galaxy] [metal] is [number] Credits
+ * 4. when you want to calculate galaxy you should write like: how much is [galaxy]
+ * 5. when you want to calculate metal you should write like: how many Credits is [galaxy] [metal]
+ * 
+ * @return currently only print the result to console in this version
+ *
+ */
 public class Galaxy {
 
-	private static String I = "I";
-	private static String V = "V";
-	private static String X = "X";//final
-	private static String L = "L";
-	private static String C = "C";
-	private static String D = "D";
-	private static String M = "M";
+	private final static String I = "I";
+	private final static String V = "V";
+	private final static String X = "X";
+	private final static String L = "L";
+	private final static String C = "C";
+	private final static String D = "D";
+	private final static String M = "M";
+	private final static String IVXLCDM = "IVXLCDM";
+	private final static String IXC = "IXC";
+	private final static String SPACE = " ";
+	private final static String EMP = "";
 	
-	private static Map<String, Integer> roma = new HashMap<String, Integer>();
+	private static Map<String, Integer> ROMA = new HashMap<String, Integer>();
 	
 		
 	public Galaxy(){
-		
+		ROMA.put(I, 1);
+		ROMA.put(V, 5);
+		ROMA.put(X, 10);
+		ROMA.put(L, 50);
+		ROMA.put(C, 100);
+		ROMA.put(D, 500);
+		ROMA.put(M, 1000);
 	}
+	
 	public static void main(String[] args){
 		Galaxy g = new Galaxy();
 		g.convert();
-		System.out.println();
-		/*Map<String, String> galaxyroma = new HashMap<String, String>();
-		galaxyroma.put("1", "M");
-		galaxyroma.put("2", "C");
-		galaxyroma.put("3", "X");
-		galaxyroma.put("4", "V");
-		galaxyroma.put("5", "I");
-		galaxyroma.put("6", "L");
-		LinkedList<String> gal = new LinkedList<String>();
-		gal.add("1");
-		gal.add("2");
-		gal.add("1");
-		gal.add("3");
-		gal.add("6");
-		gal.add("5");
-		gal.add("4");
-		int x = g.calculateDec(gal, galaxyroma);
-		
-		System.out.println(x);*/
-		
 	}
 	
 	public void convert(){
-		List<String> inp = new LinkedList<String>();//need to convert to linked list from input lines
-		inp.add("glob is I");
-		inp.add("prok is V");
-		inp.add("pish is X");
-		inp.add("tegj is L");
-		inp.add("glob glob Silver is 34 Credits");
-		inp.add("glob prok Gold is 57800 Credits");
-		inp.add("pish pish Iron is 3910 Credits");
-		inp.add("how much is pish tegj glob glob ?");
-		inp.add("how many Credits is glob prok Silver ?");
-		inp.add("how many Credits is glob prok Gold ?");
-		inp.add("how many Credits is glob prok Iron ?");
-		inp.add("how much wood could a woodchuck chuck if a woodchuck could chuck wood ?");
+		//get input note string arrays
+		List<String> inp = this.readInput();
 		
-		roma.put(I, 1);
-		roma.put(V, 5);
-		roma.put(X, 10);
-		roma.put(L, 50);
-		roma.put(C, 100);
-		roma.put(D, 500);
-		roma.put(M, 1000);
-		
+		//initialize galaxy-roma and credits variables
 		Map<String, String> galaxyroma = new HashMap<String, String>();
 		List<Object[]> creds = new ArrayList<Object[]>();
 		
@@ -79,10 +74,13 @@ public class Galaxy {
 			parseline(s,galaxyroma,creds);
 		}
 		
+		//calculate the credits cost of metal
 		Map<String, BigDecimal> mc = calculateMetalCred(creds, galaxyroma);
 		
+		//loop input note to parse and print results
+		//TODO need to output into file or not?
 		for(String s : inp){
-			String[] ss = s.trim().split(" ");//need to delete useless white spaces between chars
+			String[] ss = this.filterSpareSplit(s);
 			if(ss.length >= 4){
 				if("how".equalsIgnoreCase(ss[0])&&"much".equalsIgnoreCase(ss[1])&&"is".equalsIgnoreCase(ss[2])){
 					LinkedList<String> gal = new LinkedList<String>();
@@ -92,7 +90,7 @@ public class Galaxy {
 					}
 					int rst = calculateDec(gal, galaxyroma);
 					for(String sss : gal){
-						System.out.print(sss + " ");
+						System.out.print(sss + SPACE);
 					}
 					System.out.println("is "+rst);
 				}else if(ss.length >= 6&&"how".equalsIgnoreCase(ss[0])&&"many".equalsIgnoreCase(ss[1])&&"Credits".equalsIgnoreCase(ss[2])&&"is".equalsIgnoreCase(ss[3])){
@@ -103,7 +101,7 @@ public class Galaxy {
 					}
 					int rst = calculateDec(gal, galaxyroma);
 					for(String sss : gal){
-						System.out.print(sss + " ");
+						System.out.print(sss + SPACE);
 					}
 					String metal = ss[ss.length - 2];
 					
@@ -111,59 +109,18 @@ public class Galaxy {
 				}else if(s.indexOf("is")<0 && s.indexOf("redits")<0){
 					System.out.println("I have no idea what you are talking about");
 				}
-			}
-		}
-	}
-	private boolean calculate(){
-		
-		return false;
-	}
-	//calculate every metal costs credits
-	private Map<String, BigDecimal> calculateMetalCred(List<Object[]> creds, Map<String, String> galaxyroma){
-		Map<String, BigDecimal> mc = new HashMap<String, BigDecimal>();
-		for(Object[] arr : creds){
-			int num = calculateDec((LinkedList<String>)arr[0], galaxyroma);
-			BigDecimal sglcr = BigDecimal.valueOf((double)Integer.valueOf(String.valueOf(arr[2])) / num);
-			mc.put(arr[1].toString(),sglcr);
-		}
-		return mc;
-	}
-	private int calculateDec(LinkedList<String> gal, Map<String, String> galaxyroma){
-		String[] roms = new String[gal.size()];
-		for(int i = 0; i < gal.size(); i++){
-			roms[i] = galaxyroma.get(gal.get(i));
-		}
-		int rst = 0;
-		for(int j = 0; j < roms.length; j++){
-			String s = roms[j];
-			int curdec = roma.get(s);
-			if("IXC".indexOf(s) < 0){
-				rst += curdec;
 			}else{
-				if(j == roms.length - 1){
-					rst += curdec;
-				}else{
-					int nextdec = roma.get(roms[j+1]);
-					if(curdec < nextdec){
-						rst += (nextdec - curdec);
-						j++;
-					}else{
-						rst += curdec;
-					}
-				}
+				System.out.println("I have no idea what you are talking about");
 			}
 		}
-		return rst;
 	}
-	private boolean parseline(String s, Map<String, String> galaxyroma, List<Object[]> creds){
-		
-		if(s!=null){
-			String[] ss = s.trim().split(" ");
-			//need to delete useless white spaces between chars
-			//can convert this arrays to linked list (keep order) than filter space and than convert to string[]
+	//use for parsing the measurement in the note which is used for calculating 
+	private boolean parseline(String line, Map<String, String> galaxyroma, List<Object[]> creds){
+		if(line != null){
+			String[] ss = this.filterSpareSplit(line);
 			
 			if(ss.length==3){
-				if(ss[1].equalsIgnoreCase("is") && "IVXLCDM".indexOf(ss[2])>=0){
+				if(ss[1].equalsIgnoreCase("is") && IVXLCDM.indexOf(ss[2])>=0){
 					galaxyroma.put(ss[0], ss[2]);
 				}
 			}
@@ -189,6 +146,47 @@ public class Galaxy {
 		}
 		return false;
 	}
+	
+	//calculate every metal costs credits
+	@SuppressWarnings("unchecked")
+	private Map<String, BigDecimal> calculateMetalCred(List<Object[]> creds, Map<String, String> galaxyroma){
+		Map<String, BigDecimal> mc = new HashMap<String, BigDecimal>();
+		for(Object[] arr : creds){
+			int num = calculateDec((LinkedList<String>)arr[0], galaxyroma);
+			BigDecimal sglcr = BigDecimal.valueOf((double)Integer.valueOf(String.valueOf(arr[2])) / num);
+			mc.put(arr[1].toString(),sglcr);
+		}
+		return mc;
+	}
+	//calculate decimal from ROMA
+	private int calculateDec(LinkedList<String> gal, Map<String, String> galaxyroma){
+		String[] roms = new String[gal.size()];
+		for(int i = 0; i < gal.size(); i++){
+			roms[i] = galaxyroma.get(gal.get(i));
+		}
+		int rst = 0;
+		for(int j = 0; j < roms.length; j++){
+			String s = roms[j];
+			int curdec = ROMA.get(s);
+			if(IXC.indexOf(s) < 0){
+				rst += curdec;
+			}else{
+				if(j == roms.length - 1){
+					rst += curdec;
+				}else{
+					int nextdec = ROMA.get(roms[j+1]);
+					if(curdec < nextdec){
+						rst += (nextdec - curdec);
+						j++;
+					}else{
+						rst += curdec;
+					}
+				}
+			}
+		}
+		return rst;
+	}
+	//reverse the string in the array
 	private String[] reverse(String [] s){
 		if(s!=null){
 			int len = s.length;
@@ -198,7 +196,65 @@ public class Galaxy {
 			}
 			return ss;
 		}
-		return null;//need to dispose null
+		return null;//TODO need to dispose null
 	}
-	
+	//read input file
+	private List<String> readInput(){
+		String pathname = "inp.txt";
+		List<String> rst = new ArrayList<String>();
+		//get the path of the inp.txt file which is placed near source file and delete the beginning "file:/"
+		String path = Galaxy.class.getResource(EMP).toString().substring(5);
+		
+		File filename = new File(path+pathname);
+        
+        if(filename.isFile() && filename.exists()){
+	        BufferedReader br = null;
+	        try{
+	        	InputStreamReader reader = new InputStreamReader(new FileInputStream(filename));
+	            br = new BufferedReader(reader);
+	            String line = br.readLine();
+	            rst.add(line);
+		        while (line != null) {
+		            line = br.readLine();
+		            if(line != null){
+		            	rst.add(line);
+		            }
+		        }
+	        }catch(IOException e){
+	        	e.printStackTrace();
+	        }finally{
+	        	if(br != null){
+	        		try{
+	        			br.close();
+	        		}catch(IOException e){
+	        			e.printStackTrace();
+	        		}
+	        	}
+	        }
+        }else{
+        	System.out.println("please place inp.txt correctlly");
+        }
+        return rst;
+	}
+	private String[] filterSpareSplit(String line){
+		LinkedList<String> ll = new LinkedList<String>();
+		if(line != null){
+			if(line.length() > 0){
+				String[] arr = line.split(SPACE);
+				for(String s : arr){
+					if(!s.trim().equals(EMP)){
+						ll.add(s);
+					}
+				}
+			}
+		}
+		int len = ll.size();
+		String[] rst = new String[len];
+		if(len > 0){
+			for(int i = 0; i < len; i++){
+				rst[i] = ll.get(i);
+			}
+		}
+		return rst;
+	}
 }
