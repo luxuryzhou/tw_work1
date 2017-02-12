@@ -42,6 +42,11 @@ public class Galaxy {
 	private final static String IXC = "IXC";
 	private final static String SPACE = " ";
 	private final static String EMP = "";
+	private final static String HOW = "how";
+	private final static String MUCH = "much";
+	private final static String IS = "is";
+	private final static String MANY = "many";
+	private final static String CREDITS = "Credits";
 	
 	private static Map<String, Integer> ROMA = new HashMap<String, Integer>();
 	
@@ -82,7 +87,7 @@ public class Galaxy {
 		for(String s : inp){
 			String[] ss = this.filterSpareSplit(s);
 			if(ss.length >= 4){
-				if("how".equalsIgnoreCase(ss[0])&&"much".equalsIgnoreCase(ss[1])&&"is".equalsIgnoreCase(ss[2])){
+				if(HOW.equalsIgnoreCase(ss[0])&&MUCH.equalsIgnoreCase(ss[1])&&IS.equalsIgnoreCase(ss[2])){
 					LinkedList<String> gal = new LinkedList<String>();
 					int e = "?".equalsIgnoreCase(ss[ss.length - 1])?1:0;
 					for(int i = 3; i < ss.length - e; i++){
@@ -93,7 +98,7 @@ public class Galaxy {
 						System.out.print(sss + SPACE);
 					}
 					System.out.println("is "+rst);
-				}else if(ss.length >= 6&&"how".equalsIgnoreCase(ss[0])&&"many".equalsIgnoreCase(ss[1])&&"Credits".equalsIgnoreCase(ss[2])&&"is".equalsIgnoreCase(ss[3])){
+				}else if(ss.length >= 6&&HOW.equalsIgnoreCase(ss[0])&&MANY.equalsIgnoreCase(ss[1])&&CREDITS.equalsIgnoreCase(ss[2])&&IS.equalsIgnoreCase(ss[3])){
 					int e = "?".equalsIgnoreCase(ss[ss.length - 1])?2:1;
 					LinkedList<String> gal = new LinkedList<String>();
 					for(int i = 4; i < ss.length - e; i++){
@@ -106,7 +111,7 @@ public class Galaxy {
 					String metal = ss[ss.length - 2];
 					
 					System.out.println(metal + " is " + (int)((double)rst * mc.get(metal).doubleValue()) + " Credits");
-				}else if(s.indexOf("is")<0 && s.indexOf("redits")<0){
+				}else if(s.indexOf(IS)<0 && s.indexOf("redits")<0){
 					System.out.println("I have no idea what you are talking about");
 				}
 			}else{
@@ -120,14 +125,14 @@ public class Galaxy {
 			String[] ss = this.filterSpareSplit(line);
 			
 			if(ss.length==3){
-				if(ss[1].equalsIgnoreCase("is") && IVXLCDM.indexOf(ss[2])>=0){
+				if(ss[1].equalsIgnoreCase(IS) && IVXLCDM.indexOf(ss[2])>=0){
 					galaxyroma.put(ss[0], ss[2]);
 				}
 			}
 			
 			if(ss.length>=5){
 				String[] ssr = reverse(ss);//the reversed order
-				if(ssr[0].equalsIgnoreCase("Credits")&&ssr[2].equalsIgnoreCase("is")){
+				if(ssr[0].equalsIgnoreCase(CREDITS)&&ssr[2].equalsIgnoreCase(IS)){
 					Object[] e = new Object[3];
 					List<String> gal = new LinkedList<String>();
 						String[] gals = new String[ss.length - 4];
